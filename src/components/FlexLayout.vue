@@ -1,5 +1,6 @@
 <template>
   <div class="flexCustomDiv">
+    <!-- 组件 -->
     <div class="toolboxDiv">
       <div
         class="oneWidget"
@@ -11,9 +12,29 @@
         {{ item.name }}
       </div>
     </div>
-
+    <!-- 布局 -->
     <div class="cententDiv">
       <FlexNode :layout="config.layout"></FlexNode>
+    </div>
+    <!-- 属性 -->
+    <div class="propertyDiv">
+      <template v-if="focusWidget">
+        <div>{{ focusWidget.name }}</div>
+        <div v-for="(value, name, index) in focusWidget.property" :key="index">
+          <div class="propName">{{ name }}</div>
+          <div v-if="Array.isArray(value)" class="selectArea">
+            <select v-model="focusWidget.props[name]">
+              <option
+                v-for="(option, index) in value"
+                :key="index"
+                :value="option"
+              >
+                {{ option }}
+              </option>
+            </select>
+          </div>
+        </div>
+      </template>
     </div>
   </div>
 </template>
@@ -29,18 +50,18 @@ let config = reactive({
     {
       tag: "widget-div",
       name: "容器0",
-      widgetIndex: 1,
+      id: 1,
       children: [
         {
           name: "容器1",
           tag: "widget-div",
           children: [],
-          widgetIndex: 2,
+          id: 2,
         },
         {
           name: "组件1",
           tag: "widget-com1",
-          widgetIndex: 3,
+          id: 3,
         },
       ],
     },
@@ -49,6 +70,9 @@ let config = reactive({
     {
       name: "容器",
       tag: "widget-div",
+      property: {
+        direction: ["colume", "row"],
+      },
     },
     {
       name: "组件1",
@@ -61,6 +85,11 @@ let config = reactive({
   ],
 });
 window.aaa = config;
+
+//provide("focusWidget");
+let focusWidget = ref("");
+provide("focusWidget", focusWidget);
+//布局
 window.widgetIndex = 0;
 let dragWidget = ref("");
 provide("dragWidget", dragWidget);
@@ -68,6 +97,7 @@ function onAddWidgetDragStart(item) {
   event.dataTransfer.dropEffect = "copy";
   event.dataTransfer.setData("text/html", event.target.outerHTML);
   dragWidget.value = item;
+  event.stopPropagation();
 }
 </script>
 
@@ -101,5 +131,10 @@ function onAddWidgetDragStart(item) {
   cursor: move;
   padding: 10px;
   margin-bottom: 10px;
+}
+.propertyDiv {
+  width: 200px;
+  padding: 10px;
+  border-left: 1px solid #aaa;
 }
 </style>
