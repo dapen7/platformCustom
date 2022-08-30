@@ -7,5 +7,5 @@
 const props = defineProps({
   direction: String,
 });
-console.log(props.direction);
+console.log(props);
 </script>
