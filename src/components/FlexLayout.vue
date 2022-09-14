@@ -20,15 +20,40 @@
     <!-- 属性 -->
     <div class="propertyDiv">
       <template v-if="focusWidget">
+
         <div>{{  focusWidget.name  }}</div>
-        <div v-for="(value, name, index) in focusWidget.property" :key="index">
-          <div class="propName">{{  name  }}</div>
-          <div v-if="Array.isArray(value)" class="selectArea">
-            <select v-model="focusWidget.props[name]">
-              <option v-for="(option, index) in value" :key="index" :value="option">
-                {{  option  }}
+        <!-- 样式 -->
+        <div v-if="focusWidget.styleConfig">
+          <div>样式</div>
+          <div v-for="(styleConfig, index) in styleConfigAll" :key="index">
+            <template v-if="focusWidget.styleConfig.includes(styleConfig.key)">
+              <div class="propName">{{  styleConfig.name  }}</div>
+              <div v-if="styleConfig.select" class="selectArea">
+                <select v-model="focusWidget.styles[styleConfig.key]">
+                  <option v-for="(option, index) in styleConfig.select" :key="index" :value="option.id">
+                    {{  option.name  }}
+                  </option>
+                </select>
+              </div>
+              <div v-else>
+                <input v-model="focusWidget.styles[styleConfig.key]" />
+              </div>
+            </template>
+          </div>
+        </div>
+        <!-- 属性 -->
+        <div>属性</div>
+        <div v-for="(property, index) in focusWidget.properties" :key="index">
+          <div class="propName">{{  property.name  }}</div>
+          <div v-if="property.select" class="selectArea">
+            <select v-model="focusWidget.props[property.key]">
+              <option v-for="(option, index) in property.select" :key="index" :value="option.id">
+                {{  option.name  }}
               </option>
             </select>
+          </div>
+          <div v-else>
+            <input v-model="focusWidget.props[property.key]" />
           </div>
         </div>
       </template>
@@ -42,39 +67,70 @@ import { onMounted, provide } from "@vue/runtime-core";
 import FlexNode from "./FlexNode.vue";
 import draggable from "vuedraggable";
 
+let styleConfigAll = [
+  {
+    name: "方向",
+    key: "direction",
+    select: [{ id: "row", name: "行" }, { id: "column", name: "列" }]
+  },
+  {
+    name: "填充",
+    key: "flexgrow",
+    select: [{ id: 1, name: "是" }, { id: 0, name: "否" }]
+  },
+  {
+    name: "宽度",
+    key: "width",
+  },
+]
 //获取数据
 let config = reactive({
   layout: [
-    // {
-    //   tag: "widget-div",
-    //   name: "容器0",
-    //   id: 1111,
-    //   children: [
-    //     {
-    //       name: "容器1",
-    //       tag: "widget-div",
-    //       children: [],
-    //       id: 2222,
-    //     },
-    //     {
-    //       name: "组件1",
-    //       tag: "widget-com1",
-    //       id: 33333,
-    //     },
-    //   ],
-    // },
   ],
   widgetListOrigin: [
     {
       name: "容器",
       tag: "widget-div",
-      property: {
-        direction: ["colume", "row"],
-      },
+      properties: [],
+      styleConfig: ["direction", "flexgrow", "width"]
     },
     {
-      name: "组件1",
-      tag: "widget-com1",
+      name: "表单",
+      tag: "widget-form",
+      properties: [
+        {
+          name: "数据源",
+          key: "v-model",
+        },
+        {
+          name: "配置",
+          key: "formConfig",
+          listConfig: [
+            {
+              name: "标签",
+              key: "label",
+            },
+            {
+              name: "key",
+              key: "key",
+            },
+            {
+              name: "类型",
+              key: "type",
+              select: [
+                { id: "input", name: "输入框" },
+                { id: "select", name: "下拉列表" },
+                { id: "checkbox", name: "checkbox" },
+                { id: "radio", name: "radio" },
+                { id: "datepicker", name: "日期选择" },
+                {
+                  id: "timepicker", name: "时间选择"
+                },
+              ]
+            }
+          ],
+        }
+      ]
     },
     {
       name: "组件2",
@@ -83,24 +139,49 @@ let config = reactive({
   ],
 });
 window.aaa = config;
-
+//添加组件
 let idGlobal = 1;
-function cloneWidget(item) {
+function cloneWidget(originItem) {
+  let item = JSON.parse(JSON.stringify(originItem))
+
+  let styles = {};
+  if (item.styleConfig) {
+    styleConfigAll.forEach(property => {
+      if (item.styleConfig.includes(property.key)) {
+        if (property.select && property.select.length > 0) {
+          styles[property.key] = property.select[0].id
+        } else {
+          styles[property.key] = ""
+        }
+      }
+    })
+  }
+
   let props = {};
-  for (let key in item.property) {
-    if (Array.isArray(item.property[key])) {
-      props[key] = item.property[key][0]
-    }
+  if (item.properties) {
+    item.properties.forEach(property => {
+      if (property.select && property.select.length > 0) {
+        props[property.key] = property.select[0].id
+      } else {
+        props[property.key] = ""
+      }
+    })
   }
   let newItem = {
     id: idGlobal++,
     tag: item.tag,
     name: item.name + "-" + idGlobal,
+    styleConfig: item.styleConfig,
+    styles: styles,
     props: props,
+    properties: item.properties,
     children: [],
   }
   return newItem
 }
+//设置属性
+let focusWidget = ref("")
+provide("focusWidget", focusWidget)
 </script>
 
 <style scoped>
