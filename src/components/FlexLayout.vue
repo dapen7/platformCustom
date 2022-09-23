@@ -6,7 +6,7 @@
         :group="{ name: 'g1', pull: 'clone', put: false, sort: false }" :clone="cloneWidget" item-key="name">
         <template #item="{ element }">
           <div class="list-group-item">
-            {{  element.name  }}
+            {{ element.name }}
           </div>
         </template>
       </draggable>
@@ -20,18 +20,17 @@
     <!-- 属性 -->
     <div class="propertyDiv">
       <template v-if="focusWidget">
-
-        <div>{{  focusWidget.name  }}</div>
+        <div>{{ focusWidget.name }}</div>
         <!-- 样式 -->
         <div v-if="focusWidget.styleConfig">
           <div>样式</div>
           <div v-for="(styleConfig, index) in styleConfigAll" :key="index">
             <template v-if="focusWidget.styleConfig.includes(styleConfig.key)">
-              <div class="propName">{{  styleConfig.name  }}</div>
+              <div class="propName">{{ styleConfig.name }}</div>
               <div v-if="styleConfig.select" class="selectArea">
                 <select v-model="focusWidget.styles[styleConfig.key]">
                   <option v-for="(option, index) in styleConfig.select" :key="index" :value="option.id">
-                    {{  option.name  }}
+                    {{ option.name }}
                   </option>
                 </select>
               </div>
@@ -44,11 +43,11 @@
         <!-- 属性 -->
         <div>属性</div>
         <div v-for="(property, index) in focusWidget.properties" :key="index">
-          <div class="propName">{{  property.name  }}</div>
+          <div class="propName">{{ property.name }}</div>
           <div v-if="property.select" class="selectArea">
             <select v-model="focusWidget.props[property.key]">
               <option v-for="(option, index) in property.select" :key="index" :value="option.id">
-                {{  option.name  }}
+                {{ option.name }}
               </option>
             </select>
           </div>
